@@ -22,6 +22,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import java.util.Map;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.google.gson.Gson;
+
+
 class ExportRecordWriter implements RecordWriter<NullWritable, DynamoDBItemWritable> {
 
   private static final String UTF_8 = "UTF-8";
@@ -41,8 +46,29 @@ class ExportRecordWriter implements RecordWriter<NullWritable, DynamoDBItemWrita
     this.out = out;
   }
 
+  // NOTE: Data transformation step happens here
+  // Adding new attribute last_timestamp_range_id, which is <last_timestamp>::<video_guid>
   @Override
   public synchronized void write(NullWritable key, DynamoDBItemWritable value) throws IOException {
+    
+    Map<String, AttributeValue> dynamoDBItem = value.getItem();
+    String last_timestamp_value = "";
+    String video_guid_value = "";
+    
+    // For each attribute in the dynamo item
+    for (Map.Entry<String, AttributeValue> entry : dynamoDBItem.entrySet()) {
+      String entryKey = entry.getKey();
+      if (entryKey.equals("last_timestamp")) {
+        last_timestamp_value = entry.getValue().getN();
+      }
+      if (entryKey.equals("video_guid")) {
+        video_guid_value = entry.getValue().getS();
+      }
+    }
+    String last_timestamp_range_id = last_timestamp_value + "::" + video_guid_value;
+    dynamoDBItem.put("last_timestamp_range_id", new AttributeValue(last_timestamp_range_id));
+    value.setItem(dynamoDBItem);
+    
     out.write(value.writeStream().getBytes(UTF_8));
     out.write(NEWLINE);
   }

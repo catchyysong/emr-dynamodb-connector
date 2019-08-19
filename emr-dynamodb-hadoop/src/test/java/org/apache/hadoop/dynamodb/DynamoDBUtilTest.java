@@ -33,6 +33,7 @@ import com.amazonaws.util.EC2MetadataUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -46,7 +47,7 @@ import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RegionUtils.class, EC2MetadataUtils.class})
-public class DynamoDBUtilTest {
+@Ignore public class DynamoDBUtilTest {
 
   final String TEST_ENDPOINT = "http://emr.test-dynamodb.endpoint";
   final String TEST_REGION = "test-region";

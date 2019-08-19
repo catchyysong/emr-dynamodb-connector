@@ -99,6 +99,38 @@ public class DynamoDBExport extends Configured implements Tool {
     return 0;
   }
 
+  /*private void setTableProperties(JobConf jobConf, String tableName, Double readRatio, Integer totalSegments) {
+      jobConf.set("dynamodb.table.name", tableName);
+      jobConf.set("dynamodb.input.tableName", tableName);
+      jobConf.set("dynamodb.output.tableName", tableName);
+      DynamoDBClient client = new DynamoDBClient(jobConf);
+      TableDescription description = client.describeTable(tableName);
+      Long readThroughput = description.getProvisionedThroughput().getReadCapacityUnits();
+      Long writeThroughput = description.getProvisionedThroughput().getWriteCapacityUnits();
+      Long itemCount = description.getItemCount();
+      Long tableSizeBytes = description.getTableSizeBytes();
+      Double averageItemSize = DynamoDBUtil.calculateAverageItemSize(description);
+      jobConf.set("dynamodb.throughput.read", readThroughput.toString());
+      jobConf.set("dynamodb.throughput.write", writeThroughput.toString());
+      jobConf.set("dynamodb.item.count", itemCount.toString());
+      jobConf.set("dynamodb.table.size-bytes", tableSizeBytes.toString());
+      jobConf.set("dynamodb.item.average.size", averageItemSize.toString());
+      log.info("Read throughput:       " + readThroughput);
+      log.info("Write throughput:      " + writeThroughput);
+      log.info("Item count:            " + itemCount);
+      log.info("Table size:            " + tableSizeBytes);
+      log.info("Average item size:     " + averageItemSize);
+      if(readRatio != null) {
+         jobConf.set("dynamodb.throughput.read.percent", readRatio.toString());
+         log.info("Throughput read ratio: " + readRatio);
+      }
+
+      if(totalSegments != null) {
+         jobConf.set("dynamodb.scan.segments", totalSegments.toString());
+         log.info("Total segment count:   " + totalSegments);
+      }
+   } */
+
   private void setTableProperties(JobConf jobConf, String tableName, Double readRatio, Integer
       totalSegments) {
     jobConf.set(DynamoDBConstants.TABLE_NAME, tableName);
@@ -112,7 +144,12 @@ public class DynamoDBExport extends Configured implements Tool {
     Long tableSizeBytes = description.getTableSizeBytes();
     Double averageItemSize = DynamoDBUtil.calculateAverageItemSize(description);
 
-    if (description.getBillingModeSummary() == null
+    Long readThroughput = description.getProvisionedThroughput().getReadCapacityUnits();
+    Long writeThroughput = description.getProvisionedThroughput().getWriteCapacityUnits();
+    jobConf.set(DynamoDBConstants.READ_THROUGHPUT, readThroughput.toString());
+    jobConf.set(DynamoDBConstants.WRITE_THROUGHPUT, writeThroughput.toString());
+
+    /*if (description.getBillingModeSummary() == null
             || description.getBillingModeSummary().getBillingMode()
         .equals(DynamoDBConstants.BILLING_MODE_PROVISIONED)) {
       jobConf.set(DynamoDBConstants.READ_THROUGHPUT,
@@ -125,7 +162,7 @@ public class DynamoDBExport extends Configured implements Tool {
           DynamoDBConstants.DEFAULT_CAPACITY_FOR_ON_DEMAND.toString());
       jobConf.set(DynamoDBConstants.WRITE_THROUGHPUT,
           DynamoDBConstants.DEFAULT_CAPACITY_FOR_ON_DEMAND.toString());
-    }
+    }*/
 
     jobConf.set(DynamoDBConstants.ITEM_COUNT, itemCount.toString());
     jobConf.set(DynamoDBConstants.TABLE_SIZE_BYTES, tableSizeBytes.toString());
